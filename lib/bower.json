@@ -22,6 +22,7 @@
     "q": "~1.0.1",
     "angular": "~1.4.4",
     "angular-route": "~1.4.4",
-    "angularfire": "~1.1.2"
+    "angularfire": "~1.1.2",
+    "phaser": "~2.4.3"
   }
 }
