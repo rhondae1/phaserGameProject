@@ -2,10 +2,6 @@
 
 var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
-var GameState = function(game) {
-    this.MAX_MISSILES = 3; // number of missiles
-};
-
 function preload() {
     game.load.image('com', 'assets/computer_monitors.png');
     game.load.spritesheet('sun', 'assets/enemies/hot_sun.png', 32, 32);
@@ -15,27 +11,33 @@ function preload() {
 
 var enemies;
 
+
 function create() {
   game.physics.startSystem(Phaser.Physics.ARCADE);
   
   // game.add.sprite(68, 100, 'com');
   enemies = game.add.group();
+  enemies.enableBody = true;
 
   hotSun = game.add.sprite(0, 0, 'sun');
 
-  for (var i = 0; i < 8; i++)
-    {
-        createBugs();
-    }
+  for (var i = 0; i < 8; i++) {
+    var e = enemies.create(game.world.randomX, game.world.randomY, 'bug');
+    e.animations.add('play', [0,1,2]);
+    e.play('play', 20, true);
+    // game.physics.enable(e, Phaser.Physics.ARCADE);
+    // e.body.velocity.x = game.rnd.integerInRange(-200, 200);
+    // e.body.velocity.y = game.rnd.integerInRange(-200, 200);
+        // createBugs();
+  }
 
-  game.input.onTap.add(createBugs, this);
+  // game.input.onTap.add(createBugs, this);
 
-  function createBugs() {
+//   function createBugs() {
 
-    enemies.create(360 + Math.random() * 200, 120 + Math.random() * 200,'bug');
-    enemies.callAll('animations.add', 'animations', 'bug', [0,1,2], 10, true);
-    enemies.callAll('play', null, 'bug');
-}
+//     enemies.callAll('animations.add', 'animations', 'bug', [0,1,2], 10, true);
+//     enemies.callAll('play', null, 'bug');
+// }
 
 
 
@@ -44,18 +46,68 @@ function create() {
   hotSun.body.gravity.y = 300;
   hotSun.body.collideWorldBounds = true;
 
-  hotSun.animations.add('play', [0, 1, 2, 3, 4, 5], 10, true);
-  hotSun.animations.play('play');
-  
+  hotSun.animations.add('left', [0, 1, 2, 3, 4, 5], 10, true);
+  hotSun.animations.add('right', [0, 1, 2, 3, 4, 5], 10, true);
 
+  // hotSun.animations.add('play', [0, 1, 2, 3, 4, 5], 10, true);
+  // hotSun.animations.play('play');
+  
+  // enemies.sortDirection = Phaser.Physics.Arcade.LEFT_RIGHT;
 
   
 }
 
 function update() {
 
-  game.physics.arcade.collide(hotSun);
+  // game.physics.arcade.collide(hotSun);
+  
+  // game.physics.arcade.collide(enemies);
 
+  if (game.input.mousePointer.isDown)
+    {
+        //  First is the callback
+        //  Second is the context in which the callback runs, in this case game.physics.arcade
+        //  Third is the parameter the callback expects - it is always sent the Group child as the first parameter
+        enemies.forEach(game.physics.arcade.moveToPointer, game.physics.arcade, false, 200);
+    }
+    else
+    {
+        enemies.setAll('body.velocity.x', 0);
+        enemies.setAll('body.velocity.y', 0);
+    }
+
+  cursors = game.input.keyboard.createCursorKeys();
+
+  //  Reset the players velocity (movement)
+  hotSun.body.velocity.x = 0;
+
+  if (cursors.left.isDown)
+  {
+      //  Move to the left
+      hotSun.body.velocity.x = -150;
+
+      hotSun.animations.play('left');
+  }
+  else if (cursors.right.isDown)
+  {
+      //  Move to the right
+      hotSun.body.velocity.x = 150;
+
+      hotSun.animations.play('right');
+  }
+  else
+  {
+      //  Stand still
+      hotSun.animations.stop();
+
+      hotSun.frame = 5;
+  }
+
+  //  Allow the hotSun to jump around
+  if (cursors.up.isDown)
+  {
+      hotSun.body.velocity.y = -150;
+  }
 
 
 }
