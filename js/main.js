@@ -18,27 +18,22 @@ function create() {
   // game.add.sprite(68, 100, 'com');
   enemies = game.add.group();
   enemies.enableBody = true;
+  game.time.events.loop(550, createSprite, this);
 
-  hotSun = game.add.sprite(0, 0, 'sun');
+  hotSun = game.add.sprite(200, 200, 'sun');
+  hotSun.scale.set(2);
 
-  for (var i = 0; i < 8; i++) {
-    var e = enemies.create(game.world.randomX, game.world.randomY, 'bug');
-    e.animations.add('play', [0,1,2]);
-    e.play('play', 20, true);
-    // game.physics.enable(e, Phaser.Physics.ARCADE);
-    // e.body.velocity.x = game.rnd.integerInRange(-200, 200);
-    // e.body.velocity.y = game.rnd.integerInRange(-200, 200);
-        // createBugs();
-  }
-
-  // game.input.onTap.add(createBugs, this);
-
-//   function createBugs() {
-
-//     enemies.callAll('animations.add', 'animations', 'bug', [0,1,2], 10, true);
-//     enemies.callAll('play', null, 'bug');
-// }
-
+  // for (var i = 0; i < 8; i++) {
+  //   var e = enemies.create(game.world.randomX, game.world.randomY, 'bug');
+  //   e.animations.add('play', [0,1,2]);
+  //   e.play('play', 20, true);
+  //   e.scale.set(2);
+    
+  //   // game.physics.enable(e, Phaser.Physics.ARCADE);
+  //   // e.body.velocity.x = game.rnd.integerInRange(-200, 200);
+  //   // e.body.velocity.y = game.rnd.integerInRange(-200, 200);
+  //       // createBugs();
+  // }
 
 
   game.physics.arcade.enable(hotSun);
@@ -57,24 +52,36 @@ function create() {
   
 }
 
+function createSprite() {
+
+   var e = enemies.create(0, game.world.randomY, 'bug');
+    e.animations.add('play', [0,1,2]);
+    e.play('play', 3, true);
+
+}
+
 function update() {
 
   // game.physics.arcade.collide(hotSun);
   
   // game.physics.arcade.collide(enemies);
 
-  if (game.input.mousePointer.isDown)
-    {
-        //  First is the callback
-        //  Second is the context in which the callback runs, in this case game.physics.arcade
-        //  Third is the parameter the callback expects - it is always sent the Group child as the first parameter
-        enemies.forEach(game.physics.arcade.moveToPointer, game.physics.arcade, false, 200);
-    }
-    else
-    {
-        enemies.setAll('body.velocity.x', 0);
-        enemies.setAll('body.velocity.y', 0);
-    }
+  // if (game.input.mousePointer.isDown)
+  //   {
+  //       //  First is the callback
+  //       //  Second is the context in which the callback runs, in this case game.physics.arcade
+  //       //  Third is the parameter the callback expects - it is always sent the Group child as the first parameter
+  //       enemies.forEach(game.physics.arcade.moveToPointer, game.physics.arcade, false, 200);
+  //   }
+  //   else
+  //   {
+  //       enemies.setAll('body.velocity.x', 0);
+  //       enemies.setAll('body.velocity.y', 0);
+  //   }
+
+  enemies.setAll('x', 2, true, true, 1);
+
+  enemies.forEach(checkSprite, this, true);
 
   cursors = game.input.keyboard.createCursorKeys();
 
@@ -111,3 +118,22 @@ function update() {
 
 
 }
+
+function checkSprite(sprite) {
+
+    try {
+        if (sprite.x > game.width)
+        {
+            rip++;
+            enemies.remove(sprite, true);
+        }
+    }
+    catch (e)
+    {
+        // console.log(sprite);
+    }
+
+}
+
+
+
