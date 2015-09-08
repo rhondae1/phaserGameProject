@@ -3,58 +3,11 @@
 var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
 
-var Bullet = function (game, key) {
-
-  Phaser.Sprite.call(this, game, 0, 0, key);
-
-  this.texture.baseTexture.scaleMode = PIXI.scaleModes.NEAREST;
-
-  this.anchor.set(0.5);
-
-  this.checkWorldBounds = true;
-  this.outOfBoundsKill = true;
-  this.exists = false;
-
-  this.tracking = false;
-  this.scaleSpeed = 0;
-
-};
-
-Weapon.SingleBullet = function (game) {
-
-  Phaser.Group.call(this, game, game.world, 'Single Bullet', false, true, Phaser.Physics.ARCADE);
-
-  this.nextFire = 0;
-  this.bulletSpeed = 600;
-  this.fireRate = 100;
-
-  for (var i = 0; i < 64; i++)
-  {
-      this.add(new Bullet(game, 'bullet5'), true);
-  }
-
-  return this;
-
-};
-
-Weapon.SingleBullet.prototype.fire = function (source) {
-
-  if (this.game.time.time < this.nextFire) { return; }
-
-  var x = source.x + 10;
-  var y = source.y + 10;
-
-  this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed, 0, 0);
-
-  this.nextFire = this.game.time.time + this.fireRate;
-
-};
-
 function preload() {
     game.load.image('com', 'assets/computer_monitors.png');
+    game.load.image('pop', 'assets/pop.png', 60, 60);
     game.load.spritesheet('sun', 'assets/enemies/hot_sun.png', 32, 32);
     game.load.spritesheet('bug', 'assets/enemies/Bug.png', 32, 32);
-    game.load.spritesheet('pop', 'assets/pop.png', 60, 60);
     game.load.spritesheet('kaboom', 'assets/explode.png', 128, 128);
 
 }
@@ -62,6 +15,8 @@ function preload() {
 var enemies;
 var explosions;
 var pops;
+
+
 
 
 function create() {
@@ -84,19 +39,6 @@ function create() {
   hotSun = game.add.sprite(700, 200, 'sun');
   hotSun.scale.set(2);
 
-  // for (var i = 0; i < 8; i++) {
-  //   var e = enemies.create(game.world.randomX, game.world.randomY, 'bug');
-  //   e.animations.add('play', [0,1,2]);
-  //   e.play('play', 20, true);
-  //   e.scale.set(2);
-    
-  //   // game.physics.enable(e, Phaser.Physics.ARCADE);
-  //   // e.body.velocity.x = game.rnd.integerInRange(-200, 200);
-  //   // e.body.velocity.y = game.rnd.integerInRange(-200, 200);
-  //       // createBugs();
-  // }
-
-
   game.physics.arcade.enable(hotSun);
   hotSun.body.bounce.y = 0.2;
   hotSun.body.gravity.y = 300;
@@ -105,10 +47,6 @@ function create() {
   hotSun.animations.add('left', [0, 1, 2, 3, 4, 5], 10, true);
   hotSun.animations.add('right', [0, 1, 2, 3, 4, 5], 10, true);
 
-  // hotSun.animations.add('play', [0, 1, 2, 3, 4, 5], 10, true);
-  // hotSun.animations.play('play');
-  
-  // enemies.sortDirection = Phaser.Physics.Arcade.LEFT_RIGHT;
 
   //  An explosion pool
     explosions = game.add.group();
@@ -116,8 +54,36 @@ function create() {
     explosions.forEach(setupInvader, this);
 
     fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
+    pops = game.add.group();
+    game.physics.enable(pops, Phaser.Physics.ARCADE);
  
 }
+
+var shotTimer = 0;
+function shoot() {
+
+  if (shotTimer < game.time.now) {
+
+    shotTimer = game.time.now + 275;
+
+    var pop;
+    if ('right') {
+      pop = pops.create(hotSun.body.x + hotSun.body.width / 2 + 20, hotSun.body.y + hotSun.body.height / 2 - 4, 'pop');
+    } 
+
+    game.physics.enable(pop, Phaser.Physics.ARCADE);
+    pop.outOfBoundsKill = true;
+    pop.anchor.setTo(0.5, 0.5);
+    pop.body.velocity.y = 0;
+
+    if ('right') {
+      pop.body.velocity.x = -400;
+    }
+  }
+}
+
+
 
 function setupInvader (invader) {
 
@@ -137,22 +103,6 @@ function createSprite() {
 
 function update() {
 
-  // game.physics.arcade.collide(hotSun);
-  
-  // game.physics.arcade.collide(enemies);
-
-  // if (game.input.mousePointer.isDown)
-  //   {
-  //       //  First is the callback
-  //       //  Second is the context in which the callback runs, in this case game.physics.arcade
-  //       //  Third is the parameter the callback expects - it is always sent the Group child as the first parameter
-  //       enemies.forEach(game.physics.arcade.moveToPointer, game.physics.arcade, false, 200);
-  //   }
-  //   else
-  //   {
-  //       enemies.setAll('body.velocity.x', 0);
-  //       enemies.setAll('body.velocity.y', 0);
-  //   }
 
   enemies.setAll('x', 2, true, true, 1);
 
@@ -162,6 +112,7 @@ function update() {
 
    //  Run collision
   game.physics.arcade.overlap(enemies, hotSun, collisionHandler, null, this);
+  game.physics.arcade.overlap(enemies, pops, popHandler, null, this);
 
   //  Reset the players velocity (movement)
   hotSun.body.velocity.x = 0;
@@ -193,12 +144,16 @@ function update() {
   {
       hotSun.body.velocity.y = -150;
   }
+
   
   if (hotSun.alive){
     updateText();
     
   } 
 
+  if(fireButton.isDown) {
+    shoot();
+  }
 }
 
 function collisionHandler (bug, hotSun) {
@@ -208,7 +163,21 @@ function collisionHandler (bug, hotSun) {
     hotSun.kill();
 
 
-    //  And create an explosion :)
+    //  And create an explosion
+    var explosion = explosions.getFirstExists(false);
+    explosion.reset(bug.body.x, bug.body.y);
+    explosion.play('kaboom', 30, false, true);
+
+}
+
+function popHandler (bug, pops) {
+
+    //  When pop hits a bug we kill them both
+    bug.kill();
+    pops.kill();
+
+
+    //  And create an explosion
     var explosion = explosions.getFirstExists(false);
     explosion.reset(bug.body.x, bug.body.y);
     explosion.play('kaboom', 30, false, true);
