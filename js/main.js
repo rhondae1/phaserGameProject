@@ -17,8 +17,8 @@ function create() {
 
   //scoreboard
     count = 0;
-    text = game.add.text(25, 25, "Your Score: " + count, {
-        font: "32px Arial",
+    text = game.add.text(25, 25, "Your Score: 0", {
+        font: "16px Arial",
         fill: "#fff",
         align: "left"
     });
@@ -72,6 +72,7 @@ function createSprite() {
 
 function update() {
 
+ 
   // game.physics.arcade.collide(hotSun);
   
   // game.physics.arcade.collide(enemies);
@@ -104,6 +105,7 @@ function update() {
       hotSun.body.velocity.x = -150;
 
       hotSun.animations.play('left');
+
   }
   else if (cursors.right.isDown)
   {
@@ -126,6 +128,7 @@ function update() {
       hotSun.body.velocity.y = -150;
   }
 
+    updateText();
 
 }
 
@@ -142,5 +145,13 @@ function checkSprite(sprite) {
     {
         // console.log(sprite);
     }
+
+}
+
+function updateText() {
+
+    count++;
+
+    text.setText("- Your Score: " + count);
 
 }
