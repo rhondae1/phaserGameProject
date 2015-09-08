@@ -5,8 +5,8 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create
 
 function preload() {
     game.load.image('com', 'assets/computer_monitors.png');
-    game.load.image('pop', 'assets/pop.png', 60, 60);
-    game.load.spritesheet('sun', 'assets/enemies/hot_sun.png', 32, 32);
+    game.load.image('popp', 'assets/popp.png', 60, 60);
+    game.load.spritesheet('steve', 'assets/super-steve.png', 49, 37);
     game.load.spritesheet('bug', 'assets/enemies/Bug.png', 32, 32);
     game.load.spritesheet('kaboom', 'assets/explode.png', 128, 128);
 
@@ -36,16 +36,16 @@ function create() {
   enemies.enableBody = true;
   game.time.events.loop(550, createSprite, this);
 
-  hotSun = game.add.sprite(700, 200, 'sun');
-  hotSun.scale.set(2);
+  steve = game.add.sprite(700, 200, 'steve');
+  steve.scale.set(2);
 
-  game.physics.arcade.enable(hotSun);
-  hotSun.body.bounce.y = 0.2;
-  hotSun.body.gravity.y = 300;
-  hotSun.body.collideWorldBounds = true;
+  game.physics.arcade.enable(steve);
+  steve.body.bounce.y = 0.2;
+  steve.body.gravity.y = 300;
+  steve.body.collideWorldBounds = true;
 
-  hotSun.animations.add('left', [0, 1, 2, 3, 4, 5], 10, true);
-  hotSun.animations.add('right', [0, 1, 2, 3, 4, 5], 10, true);
+  // steve.animations.add('left', [0], true);
+  // steve.animations.add('right', [1], true);
 
 
   //  An explosion pool
@@ -67,18 +67,18 @@ function shoot() {
 
     shotTimer = game.time.now + 275;
 
-    var pop;
+    var popp;
     if ('right') {
-      pop = pops.create(hotSun.body.x + hotSun.body.width / 2 + 20, hotSun.body.y + hotSun.body.height / 2 - 4, 'pop');
+      popp = pops.create(steve.body.x + steve.body.width / 2 + 20, steve.body.y + steve.body.height / 2 - 4, 'popp');
     } 
 
-    game.physics.enable(pop, Phaser.Physics.ARCADE);
-    pop.outOfBoundsKill = true;
-    pop.anchor.setTo(0.5, 0.5);
-    pop.body.velocity.y = 0;
+    game.physics.enable(popp, Phaser.Physics.ARCADE);
+    popp.outOfBoundsKill = true;
+    popp.anchor.setTo(0.5, 0.5);
+    popp.body.velocity.y = 0;
 
     if ('right') {
-      pop.body.velocity.x = -400;
+      popp.body.velocity.x = -400;
     }
   }
 }
@@ -111,42 +111,42 @@ function update() {
   cursors = game.input.keyboard.createCursorKeys();
 
    //  Run collision
-  game.physics.arcade.overlap(enemies, hotSun, collisionHandler, null, this);
+  game.physics.arcade.overlap(enemies, steve, collisionHandler, null, this);
   game.physics.arcade.overlap(enemies, pops, popHandler, null, this);
 
   //  Reset the players velocity (movement)
-  hotSun.body.velocity.x = 0;
+  steve.body.velocity.x = 0;
 
   if (cursors.left.isDown)
   {
       //  Move to the left
-      hotSun.body.velocity.x = -150;
+      steve.body.velocity.x = -150;
 
-      hotSun.animations.play('left');
+      steve.frame = 0;
   }
   else if (cursors.right.isDown)
   {
       //  Move to the right
-      hotSun.body.velocity.x = 150;
+      steve.body.velocity.x = 150;
 
-      hotSun.animations.play('right');
+      steve.frame = 1;
   }
   else
   {
       //  Stand still
-      hotSun.animations.stop();
+      steve.animations.stop();
 
-      hotSun.frame = 5;
+      steve.frame = 0;
   }
 
-  //  Allow the hotSun to jump around
+  //  Allow the steve to jump around
   if (cursors.up.isDown)
   {
-      hotSun.body.velocity.y = -150;
+      steve.body.velocity.y = -150;
   }
 
   
-  if (hotSun.alive){
+  if (steve.alive){
     updateText();
     
   } 
@@ -156,11 +156,11 @@ function update() {
   }
 }
 
-function collisionHandler (bug, hotSun) {
+function collisionHandler (bug, steve) {
 
-    //  When hotSun hits a bug we kill them both
+    //  When steve hits a bug we kill them both
     bug.kill();
-    hotSun.kill();
+    steve.kill();
 
 
     //  And create an explosion
@@ -172,7 +172,7 @@ function collisionHandler (bug, hotSun) {
 
 function popHandler (bug, pops) {
 
-    //  When pop hits a bug we kill them both
+    //  When popp hits a bug we kill them both
     bug.kill();
     pops.kill();
 
