@@ -1,8 +1,8 @@
 {
-  "name": "Pinterest-Project",
+  "name": "phaserGameProject",
   "version": "0.0.0",
   "authors": [
-    "Brittney Corona <BrittneyLCorona@gmail.com>"
+    "Jeremy Grondahl <jeremygrondahl@gmail.com>"
   ],
   "license": "MIT",
   "ignore": [
@@ -13,6 +13,7 @@
     "tests"
   ],
   "dependencies": {
+<<<<<<< HEAD
     "angular": "~1.4.4",
     "angular-route": "~1.4.4",
     "angularfire": "~1.1.2",
@@ -24,5 +25,11 @@
     "q": "~1.0.1",
     "require-handlebars-plugin": "~0.11.3",
     "requirejs": "~2.1.20"
+=======
+    "jquery": "~2.1.4",
+    "bootstrap": "~3.3.5",
+    "lodash": "~3.10.1",
+    "q": "~1.0.1"
+>>>>>>> c67c5b0f4d49beb46f66d77e4fb6796357ef425b
   }
 }
