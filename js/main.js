@@ -8,10 +8,20 @@ function preload() {
 }
 
 var enemies;
-
+var count;
+var text;
+var timer;
 
 function create() {
   game.physics.startSystem(Phaser.Physics.ARCADE);
+
+  //scoreboard
+    count = 0;
+    text = game.add.text(25, 25, "Your Score: " + count, {
+        font: "32px Arial",
+        fill: "#fff",
+        align: "left"
+    });
   
   // game.add.sprite(68, 100, 'com');
   enemies = game.add.group();
@@ -46,6 +56,8 @@ function create() {
   // hotSun.animations.play('play');
   
   // enemies.sortDirection = Phaser.Physics.Arcade.LEFT_RIGHT;
+
+//Scoreboard
 
   
 }
@@ -132,7 +144,3 @@ function checkSprite(sprite) {
     }
 
 }
-
-
-
->>>>>>> c67c5b0f4d49beb46f66d77e4fb6796357ef425b
