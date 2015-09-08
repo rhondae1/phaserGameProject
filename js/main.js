@@ -20,80 +20,36 @@ var Bullet = function (game, key) {
 
 };
 
-Bullet.prototype = Object.create(Phaser.Sprite.prototype);
-Bullet.prototype.constructor = Bullet;
+Weapon.SingleBullet = function (game) {
 
-Bullet.prototype.fire = function (x, y, angle, speed, gx, gy) {
+  Phaser.Group.call(this, game, game.world, 'Single Bullet', false, true, Phaser.Physics.ARCADE);
 
-  gx = gx || 0;
-  gy = gy || 0;
+  this.nextFire = 0;
+  this.bulletSpeed = 600;
+  this.fireRate = 100;
 
-  this.reset(x, y);
-  this.scale.set(1);
+  for (var i = 0; i < 64; i++)
+  {
+      this.add(new Bullet(game, 'bullet5'), true);
+  }
 
-  this.game.physics.arcade.velocityFromAngle(angle, speed, this.body.velocity);
-
-  this.angle = angle;
-
-  this.body.gravity.set(gx, gy);
+  return this;
 
 };
 
-Bullet.prototype.update = function () {
+Weapon.SingleBullet.prototype.fire = function (source) {
 
-  if (this.tracking)
-  {
-      this.rotation = Math.atan2(this.body.velocity.y, this.body.velocity.x);
-  }
+  if (this.game.time.time < this.nextFire) { return; }
 
-  if (this.scaleSpeed > 0)
-  {
-      this.scale.x += this.scaleSpeed;
-      this.scale.y += this.scaleSpeed;
-  }
+  var x = source.x + 10;
+  var y = source.y + 10;
+
+  this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed, 0, 0);
+
+  this.nextFire = this.game.time.time + this.fireRate;
 
 };
 
-
-var pops = {};
-
-
-////////////////////////////////////////////////////
-    //  A single pop is fired in front of the sun //
-    ////////////////////////////////////////////////////
-
-    pops.SingleBullet = function (game) {
-
-        Phaser.Group.call(this, game, game.world, 'Single Bullet', false, true, Phaser.Physics.ARCADE);
-
-        this.nextFire = 0;
-        this.bulletSpeed = 600;
-        this.fireRate = 100;
-
-        for (var i = 0; i < 64; i++)
-        {
-            this.add(new Bullet(game, 'pop'), true);
-        }
-
-        return this;
-
-    };
-
-    pops.SingleBullet.prototype = Object.create(Phaser.Group.prototype);
-    pops.SingleBullet.prototype.constructor = pops.SingleBullet;
-
-    pops.SingleBullet.prototype.fire = function (source) {
-
-        if (this.game.time.time < this.nextFire) { return; }
-
-        var x = source.x + 10;
-        var y = source.y + 10;
-
-        this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed, 0, 0);
-
-        this.nextFire = this.game.time.time + this.fireRate;
-
-    };
 function preload() {
     game.load.image('com', 'assets/computer_monitors.png');
     game.load.spritesheet('sun', 'assets/enemies/hot_sun.png', 32, 32);
@@ -103,28 +59,22 @@ function preload() {
 
 }
 
- //  The core game loop
-
-  var PhaserGame = function () {
-
-      this.weapons = [];
-      this.currentWeapon = 0;
-      this.weaponName = null;
-
-  };
-
-
 var enemies;
 var explosions;
-
+var pops;
 
 
 function create() {
   game.physics.startSystem(Phaser.Physics.ARCADE);
 
-  pops.push(new pops.SingleBullet(this.game));
+  //scoreboard
+   count = 0;
+   text = game.add.text(25, 25, "Your Score: 0", {
+       font: "16px Arial",
+       fill: "#fff",
+       align: "left"
+   });
 
-    
   
   // game.add.sprite(68, 100, 'com');
   enemies = game.add.group();
@@ -165,7 +115,7 @@ function create() {
     explosions.createMultiple(30, 'kaboom');
     explosions.forEach(setupInvader, this);
 
-    this.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
+    fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
  
 }
 
@@ -243,7 +193,11 @@ function update() {
   {
       hotSun.body.velocity.y = -150;
   }
-
+  
+  if (hotSun.alive){
+    updateText();
+    
+  } 
 
 }
 
@@ -277,6 +231,13 @@ function checkSprite(sprite) {
 
 }
 
+function updateText() {
+
+    count++;
+
+    text.setText("Your Score: " + count);
+
+} 
 
 
 
