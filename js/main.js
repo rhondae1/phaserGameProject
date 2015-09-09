@@ -265,7 +265,7 @@ var play = {
   }
 
   if(fireButton.isDown && steve.alive) {
-    shoot();
+    this.shoot();
   }
 
   filter.update(game.input.keyboard);
