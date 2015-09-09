@@ -225,6 +225,10 @@ function update() {
     
   } 
 
+  else {
+    music.stop(); 
+  }
+
   if(fireButton.isDown && steve.alive) {
     shoot();
   }
