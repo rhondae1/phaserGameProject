@@ -4,23 +4,34 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create
 
 
 function preload() {
-    game.load.image('com', 'assets/computer_monitors.png');
     game.load.image('popp', 'assets/popp.png', 60, 60);
+    game.load.image('code', 'assets/declare.png', 60, 60);
+    game.load.image('brackets', 'assets/brackets.png', 60, 60);
     game.load.spritesheet('steve', 'assets/super-steve.png', 49, 37);
     game.load.spritesheet('bug', 'assets/enemies/Bug.png', 32, 32);
     game.load.spritesheet('kaboom', 'assets/explode.png', 128, 128);
+    //  Firefox doesn't support mp3 files, so use ogg
+    game.load.audio('super', ['assets/audio/supermanTheme.ogg']);
 
 }
 
 var enemies;
+var code;
+var brackets;
 var explosions;
 var pops;
+var music;
 
 
 
 
 function create() {
   game.physics.startSystem(Phaser.Physics.ARCADE);
+
+  music = game.add.audio('super');
+
+  music.play();
+
 
   // background filter
   var fragmentSrc = [
@@ -79,10 +90,15 @@ function create() {
    });
 
   
-  // game.add.sprite(68, 100, 'com');
+  code = game.add.group();
+  code.enableBody = true;
+  brackets = game.add.group();
+  brackets.enableBody = true;
+  game.time.events.loop(550, createCode, this);
   enemies = game.add.group();
   enemies.enableBody = true;
-  game.time.events.loop(550, createSprite, this);
+  game.time.events.loop(300, createSprite, this);
+  enemies.scale.set(1.5);
 
   steve = game.add.sprite(700, 200, 'steve');
   steve.scale.set(2);
@@ -122,7 +138,7 @@ function shoot() {
 
     game.physics.enable(popp, Phaser.Physics.ARCADE);
     popp.outOfBoundsKill = true;
-    popp.anchor.setTo(0.5, 0.5);
+    popp.anchor.setTo(1.5, 0.5);
     popp.body.velocity.y = 0;
 
     if ('right') {
@@ -149,10 +165,20 @@ function createSprite() {
 
 }
 
+function createCode() {
+
+   var c = code.create(0, game.world.randomY, 'code');
+   var b = brackets.create(0, game.world.randomY, 'brackets');
+   
+
+}
+
 function update() {
 
 
   enemies.setAll('x', 2, true, true, 1);
+  code.setAll('x', 2, true, true, 1);
+  brackets.setAll('x', 2, true, true, 1);
 
   enemies.forEach(checkSprite, this, true);
 
@@ -199,7 +225,7 @@ function update() {
     
   } 
 
-  if(fireButton.isDown) {
+  if(fireButton.isDown && steve.alive) {
     shoot();
   }
 
@@ -211,7 +237,7 @@ function collisionHandler (bug, steve) {
     //  When steve hits a bug we kill them both
     bug.kill();
     steve.kill();
-
+    
 
     //  And create an explosion
     var explosion = explosions.getFirstExists(false);
