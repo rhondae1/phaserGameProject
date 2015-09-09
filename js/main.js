@@ -1,7 +1,66 @@
-var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(800, 600, Phaser.AUTO, '');
+
+var enemies;
+var code;
+var brackets;
+var explosions;
+var pops;
+var music;
+var fragmentSrc;
+var count;
+var shotTimer = 0;
+var popp;
+var e;
+var c;
+var b;
+var cursors;
+var fireButton;
+
+var menu = {
+  preload: function() {
+    game.load.image("menu", "assets/menu.png", 800, 600);
+    game.load.image("mute", "assets/mute.png");
+  },
+
+  create: function() {
+  // Name of the game
+    game.add.sprite(0, 0, 'menu');
+    music = game.add.audio('super');
+
+    music.play();
 
 
-function preload() {
+   var nameLabel = game.add.text(game.world.centerX, game.world.height-130, 'SuperSteve', { font: '80px Arial', fill: '#ff0000 ' });
+   nameLabel.anchor.setTo(0.5, 0.5);
+   // How to start the game
+   var startLabel = game.add.text(game.world.centerX, game.world.height-80, 'Press the up arrow key to start', { font: '25px Arial', fill: '#ffffff ' });
+   startLabel.anchor.setTo(0.5, 0.5);  
+   game.add.tween(startLabel).to({angle: -2}, 500).to({angle:2}, 500).loop().start(); 
+   // Add a mute button
+   this.muteButton = game.add.button(20, 20, 'mute', this.toggleSound, this);
+
+   this.muteButton.input.useHandCursor = true;
+   if (game.sound.mute) {
+     this.muteButton.frame = 1;
+   }
+   // Start the game when the up arrow key is pressed
+   var upKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+   upKey.onDown.addOnce(this.start, this);
+ },
+
+ toggleSound: function() {
+   game.sound.mute = ! game.sound.mute;
+   this.muteButton.frame = game.sound.mute ? 1 : 0;  
+ },
+
+ start: function() {
+   game.state.start('play'); 
+ }
+};
+
+var play = {
+
+  preload: function() {
     game.load.image('popp', 'assets/popp.png', 60, 60);
     game.load.image('code', 'assets/declare.png', 60, 60);
     game.load.image('brackets', 'assets/brackets.png', 60, 60);
@@ -10,44 +69,14 @@ function preload() {
     game.load.spritesheet('kaboom', 'assets/explode.png', 128, 128);
     //  Firefox doesn't support mp3 files, so use ogg
     game.load.audio('super', ['assets/audio/supermanTheme.ogg']);
+  },
 
-}
-
-var enemies;
-<<<<<<< HEAD
-var count;
-var text;
-var timer;
-=======
-var code;
-var brackets;
-var explosions;
-var pops;
-var music;
-
-
-
->>>>>>> ae8abcd1d08268355005ab3b19d90dd197c69bbd
-
-function create() {
-  game.physics.startSystem(Phaser.Physics.ARCADE);
-
-<<<<<<< HEAD
-  //scoreboard
-    count = 0;
-    text = game.add.text(25, 25, "Your Score: 0", {
-        font: "16px Arial",
-        fill: "#fff",
-        align: "left"
-    });
-=======
-  music = game.add.audio('super');
-
-  music.play();
-
-
-  // background filter
-  var fragmentSrc = [
+  create: function() {
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+    music = game.add.audio('super');
+    music.play();
+    // background filter
+    fragmentSrc = [
 
     "precision mediump float;",
 
@@ -82,70 +111,67 @@ function create() {
 
         "gl_FragColor = vec4( 0.0, c, 0.0, 1.0 );",
     "}"
-  ];
+  ],
 
-  filter = new Phaser.Filter(game, null, fragmentSrc);
-  filter.setResolution(800, 600);
+    filter = new Phaser.Filter(game, null, fragmentSrc);
+    filter.setResolution(800, 600);
 
-  sprite = game.add.sprite();
-  sprite.width = 800;
-  sprite.height = 600;
+    sprite = game.add.sprite();
+    sprite.width = 800;
+    sprite.height = 600;
 
-  sprite.filters = [ filter ];
+    sprite.filters = [ filter ];
 
 
-  //scoreboard
-   count = 0;
-   text = game.add.text(25, 25, "Your Score: 0", {
-       font: "16px Arial",
-       fill: "#fff",
-       align: "left"
-   });
+    //scoreboard
+     count = 0;
+     text = game.add.text(25, 25, "Your Score: 0", {
+         font: "16px Arial",
+         fill: "#fff",
+         align: "left"
+     });
 
->>>>>>> ae8abcd1d08268355005ab3b19d90dd197c69bbd
   
-  code = game.add.group();
-  code.enableBody = true;
-  brackets = game.add.group();
-  brackets.enableBody = true;
-  game.time.events.loop(550, createCode, this);
-  enemies = game.add.group();
-  enemies.enableBody = true;
-  game.time.events.loop(300, createSprite, this);
-  enemies.scale.set(1.5);
+    code = game.add.group();
+    code.enableBody = true;
+    brackets = game.add.group();
+    brackets.enableBody = true;
+    game.time.events.loop(550, this.createCode, this);
+    enemies = game.add.group();
+    enemies.enableBody = true;
+    game.time.events.loop(300, this.createSprite, this);
+    enemies.scale.set(1.5);
 
-  steve = game.add.sprite(700, 200, 'steve');
-  steve.scale.set(2);
+    steve = game.add.sprite(700, 200, 'steve');
+    steve.scale.set(2);
 
-  game.physics.arcade.enable(steve);
-  steve.body.bounce.y = 0.2;
-  steve.body.gravity.y = 300;
-  steve.body.collideWorldBounds = true;
+    game.physics.arcade.enable(steve);
+    steve.body.bounce.y = 0.2;
+    steve.body.gravity.y = 300;
+    steve.body.collideWorldBounds = true;
 
-  // steve.animations.add('left', [0], true);
-  // steve.animations.add('right', [1], true);
+    // steve.animations.add('left', [0], true);
+    // steve.animations.add('right', [1], true);
 
 
-  //  An explosion pool
+    //  An explosion pool
     explosions = game.add.group();
     explosions.createMultiple(30, 'kaboom');
-    explosions.forEach(setupInvader, this);
+    explosions.forEach(this.setupInvader, this);
 
     fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
     pops = game.add.group();
     game.physics.enable(pops, Phaser.Physics.ARCADE);
  
-}
+  },
 
-var shotTimer = 0;
-function shoot() {
+  shoot: function() {
 
   if (shotTimer < game.time.now) {
 
     shotTimer = game.time.now + 275;
 
-    var popp;
     if ('right') {
       popp = pops.create(steve.body.x + steve.body.width / 2 + 20, steve.body.y + steve.body.height / 2 - 4, 'popp');
     } 
@@ -159,74 +185,43 @@ function shoot() {
       popp.body.velocity.x = -400;
     }
   }
-}
+  },
 
-
-
-function setupInvader (invader) {
+  setupInvader: function (invader) {
 
     invader.anchor.x = 0.5;
     invader.anchor.y = 0.5;
     invader.animations.add('kaboom');
+  },
 
-<<<<<<< HEAD
-//Scoreboard
+  createSprite: function() {
 
-  
-=======
->>>>>>> ae8abcd1d08268355005ab3b19d90dd197c69bbd
-}
-
-function createSprite() {
-
-   var e = enemies.create(0, game.world.randomY, 'bug');
+    e = enemies.create(0, game.world.randomY, 'bug');
     e.animations.add('play', [0,1,2]);
     e.play('play', 3, true);
+  },
 
-}
+  createCode: function() {
 
-function createCode() {
+   c = code.create(0, game.world.randomY, 'code');
+   b = brackets.create(0, game.world.randomY, 'brackets');
+    
+  },
 
-   var c = code.create(0, game.world.randomY, 'code');
-   var b = brackets.create(0, game.world.randomY, 'brackets');
-   
+  update: function() {
 
-}
-
-function update() {
-
-<<<<<<< HEAD
- 
-  // game.physics.arcade.collide(hotSun);
-  
-  // game.physics.arcade.collide(enemies);
-
-  // if (game.input.mousePointer.isDown)
-  //   {
-  //       //  First is the callback
-  //       //  Second is the context in which the callback runs, in this case game.physics.arcade
-  //       //  Third is the parameter the callback expects - it is always sent the Group child as the first parameter
-  //       enemies.forEach(game.physics.arcade.moveToPointer, game.physics.arcade, false, 200);
-  //   }
-  //   else
-  //   {
-  //       enemies.setAll('body.velocity.x', 0);
-  //       enemies.setAll('body.velocity.y', 0);
-  //   }
-=======
->>>>>>> ae8abcd1d08268355005ab3b19d90dd197c69bbd
 
   enemies.setAll('x', 2, true, true, 1);
   code.setAll('x', 2, true, true, 1);
   brackets.setAll('x', 2, true, true, 1);
 
-  enemies.forEach(checkSprite, this, true);
+  enemies.forEach(this.checkSprite, this, true);
 
   cursors = game.input.keyboard.createCursorKeys();
 
    //  Run collision
-  game.physics.arcade.overlap(enemies, steve, collisionHandler, null, this);
-  game.physics.arcade.overlap(enemies, pops, popHandler, null, this);
+  game.physics.arcade.overlap(enemies, steve, this.collisionHandler, null, this);
+  game.physics.arcade.overlap(enemies, pops, this.popHandler, null, this);
 
   //  Reset the players velocity (movement)
   steve.body.velocity.x = 0;
@@ -236,12 +231,7 @@ function update() {
       //  Move to the left
       steve.body.velocity.x = -150;
 
-<<<<<<< HEAD
-      hotSun.animations.play('left');
-
-=======
       steve.frame = 0;
->>>>>>> ae8abcd1d08268355005ab3b19d90dd197c69bbd
   }
   else if (cursors.right.isDown)
   {
@@ -266,7 +256,7 @@ function update() {
 
   
   if (steve.alive){
-    updateText();
+    this.updateText();
     
   } 
 
@@ -278,13 +268,10 @@ function update() {
     shoot();
   }
 
-<<<<<<< HEAD
-    updateText();
-=======
   filter.update(game.input.keyboard);
-}
+  },
 
-function collisionHandler (bug, steve) {
+  collisionHandler: function(bug, steve) {
 
     //  When steve hits a bug we kill them both
     bug.kill();
@@ -292,13 +279,13 @@ function collisionHandler (bug, steve) {
     
 
     //  And create an explosion
-    var explosion = explosions.getFirstExists(false);
+    explosion = explosions.getFirstExists(false);
     explosion.reset(bug.body.x, bug.body.y);
     explosion.play('kaboom', 30, false, true);
 
-}
+  },
 
-function popHandler (bug, pops) {
+  popHandler: function (bug, pops) {
 
     //  When popp hits a bug we kill them both
     bug.kill();
@@ -306,14 +293,13 @@ function popHandler (bug, pops) {
 
 
     //  And create an explosion
-    var explosion = explosions.getFirstExists(false);
+    explosion = explosions.getFirstExists(false);
     explosion.reset(bug.body.x, bug.body.y);
     explosion.play('kaboom', 30, false, true);
->>>>>>> ae8abcd1d08268355005ab3b19d90dd197c69bbd
 
-}
+  },
 
-function checkSprite(sprite) {
+  checkSprite: function(sprite) {
 
     try {
         if (sprite.x > game.width)
@@ -327,24 +313,17 @@ function checkSprite(sprite) {
         // console.log(sprite);
     }
 
-}
+  },
 
-function updateText() {
-<<<<<<< HEAD
-=======
+  updateText: function () {
 
     count++;
 
     text.setText("Your Score: " + count);
 
-} 
+  },
+};
 
-
-
->>>>>>> ae8abcd1d08268355005ab3b19d90dd197c69bbd
-
-    count++;
-
-    text.setText("- Your Score: " + count);
-
-}
+game.state.add("menu", menu);
+game.state.add("play", play);
+game.state.start("menu"); 
